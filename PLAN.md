@@ -2,7 +2,7 @@
 
 Updated: September 6, 2026.
 
-State: **workspace ready; prototype authorized by Sai; professor review pending.** The remaining review concerns the eventual research contribution/publication, not whether to prepare this workspace.
+State: **repository published; ready for local implementation; prototype authorized by Sai; professor review pending.** Orin cloning and live runtime checks remain pending before device experiments. The remaining professor review concerns the eventual research contribution/publication, not whether to prepare this workspace.
 
 ## Completed
 
@@ -16,7 +16,7 @@ Scaffold verification: all three JSON configs and package metadata parse; the pa
 ## Next: repository and development setup
 
 - [x] Initialize the local repository and connect `origin` to `https://github.com/saisandeshk/s1-chunked-prefill.git`, supplied by Sai.
-- [ ] Make the initial commit and push; record the resulting commit in future device handoffs.
+- [x] Create and push initial scaffold commit `473b78d` to `origin/main`; `main` tracks that remote branch. Record the current commit in future device handoffs.
 - [ ] Clone onto each Orin's NVMe workspace and verify that all three checkouts share the intended commit.
 - [ ] Probe live Python/runtime/model/endpoint access and device availability without changing operating state.
 
