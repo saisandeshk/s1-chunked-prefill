@@ -25,7 +25,7 @@ Scaffold verification: all three JSON configs and package metadata parse; the pa
 - [x] Implement streamed response recording: request dispatch, first content, subsequent content events, completion, usage, and errors.
 - [x] Add meaningful local tests using fragmented SSE fixtures, empty/role-only events, interrupted streams, and multi-token content chunks.
 - [x] Implement a reproducible mixed-arrival trace: active decodes followed by an injected long prompt; record intended and actual dispatch times.
-- [ ] Implement an explicit adapter to the existing runtime controller with fixed common launch parameters and per-treatment chunk sizes.
+- [x] Implement an explicit adapter to the existing runtime controller with fixed common launch parameters and per-treatment chunk sizes.
 - [ ] Establish actual token lengths, comparable prefix-cache behavior, common token-pool feasibility, and real prefill/decode overlap on one Orin.
 - [ ] Run the three-treatment diagnostic pilot and inspect whether an interpretable effect exists.
 
@@ -38,10 +38,12 @@ Scaffold verification: all three JSON configs and package metadata parse; the pa
 
 ## Current checkpoint and next actions
 
-- Eight local tests pass, including a real fragmented HTTP/SSE server and overlapping arrivals. Use `PYTHONPATH=src python3 -B -m unittest discover -s tests -v`.
+- Twelve local tests pass, including a real fragmented HTTP/SSE server and overlapping arrivals. Use `PYTHONPATH=src python3 -B -m unittest discover -s tests -v`.
 - Both Orins have Python 3.10.12. Orin-1 has ~58 GiB available RAM and Orin-2 ~49 GiB; both had no running Docker containers at admission. Orin-2 reports active K3s/jtop; preserve and record service state.
-- Orin-1's exact runtime image was absent despite historical records. Its ten-file model manifest passed on September 7 local time. The existing exact-image deployment script has finished; inspect `runs/bringup-20260907/restore-image.log` and verify the resulting image before launch.
+- Orin-1's exact runtime image was absent despite historical records. Its ten-file model manifest passed on September 7 local time. The exact-image deployment finished and image identity was verified; serving bring-up also passed on the restored image. Import evidence: `/media/ssd/saisandesh/telemetry/sglang-0.5.16-deployment/orin64-ref-01/import/20260906T184409Z`.
 - Orin-2 diagnostic container `jouleserve-srs-s1-c4096` is running on loopback port 30001. Its controller evidence is in the JouleServe checkout at `runs/srs-s1-bringup-20260907-c4096`; S1 bring-up log/config are in `runs/bringup-20260907/`. Live server has `enable_mixed_chunk=false`, context 4096 and token pool 8192.
-- Next: sync this commit; generate an exact-token trace on Orin-2, warm/flush only this owned endpoint, record initial stream trace, verify overlap/counts, and calibrate the injection offset. Implement the guarded campaign adapter before repeated treatment blocks.
+- Orin-2 first diagnostic (`runs/pilot-orin2-c4096-first`) passed 5/5 requests, exact 256/3072 input and 128 output counts, zero cached tokens, four active decodes spanning injection. Scheduler log corroborates 4 running requests during the injected prefill. Curated summary: `results/bringup/orin2-first-trace.json`; imported raw hashes verified locally.
+- Versioned traces: `data/traces/mixed-v1.json` (500 ms injection), `decode-only-v1.json`, `prefill-only-v1.json`. Native synthetic workload; no chat quality claims.
+- Guarded diagnostic campaign implemented: randomized treatment blocks, live config checks, shape warmups, cache flush plus cached-token validation, telemetry, host snapshots, durable per-run/cell status, owned cleanup, port lock. Next: sync and exercise it on both devices, starting with one block before larger campaigns.
+- Bring-up containers currently use `jouleserve-srs-s1-c4096` on port 30001 on both boards. Stop through the controller before a campaign; Orin-1 evidence is `JouleServe/runs/srs-s1-restored-20260907-c4096`, Orin-2 evidence is `JouleServe/runs/srs-s1-bringup-20260907-c4096`.
 - No claim-bearing campaign or measured scientific result is complete. The goal remains active through paper generation and verification.
-

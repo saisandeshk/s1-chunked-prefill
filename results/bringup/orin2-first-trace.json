@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "classification": "diagnostic",
+  "manifest_status": "complete",
+  "request_metrics": [
+    {
+      "id": "active-1",
+      "role": "active",
+      "status": "ok",
+      "ttft_ms": 62.818784,
+      "response_ms": 1242.51679,
+      "dispatch_lateness_ms": 0.733812,
+      "content_events": 128,
+      "content_gap_p95_ms": 10.603173399999982,
+      "content_gap_max_ms": 145.699226,
+      "aggregate_tpot_ms": 9.281915417322834,
+      "prompt_tokens": 256,
+      "completion_tokens": 128,
+      "cached_tokens": 0
+    },
+    {
+      "id": "active-3",
+      "role": "active",
+      "status": "ok",
+      "ttft_ms": 62.825344,
+      "response_ms": 1243.672648,
+      "dispatch_lateness_ms": 0.509725,
+      "content_events": 128,
+      "content_gap_p95_ms": 11.172562099999986,
+      "content_gap_max_ms": 147.416373,
+      "aggregate_tpot_ms": 9.29119151968504,
+      "prompt_tokens": 256,
+      "completion_tokens": 128,
+      "cached_tokens": 0
+    },
+    {
+      "id": "active-2",
+      "role": "active",
+      "status": "ok",
+      "ttft_ms": 48.058738,
+      "response_ms": 1245.275048,
+      "dispatch_lateness_ms": 0.224584,
+      "content_events": 128,
+      "content_gap_p95_ms": 12.22143839999999,
+      "content_gap_max_ms": 145.064371,
+      "aggregate_tpot_ms": 9.420429031496063,
+      "prompt_tokens": 256,
+      "completion_tokens": 128,
+      "cached_tokens": 0
+    },
+    {
+      "id": "active-0",
+      "role": "active",
+      "status": "ok",
+      "ttft_ms": 63.12738,
+      "response_ms": 1245.935021,
+      "dispatch_lateness_ms": 0.609273,
+      "content_events": 128,
+      "content_gap_p95_ms": 11.394920799999976,
+      "content_gap_max_ms": 146.813805,
+      "aggregate_tpot_ms": 9.306831330708661,
+      "prompt_tokens": 256,
+      "completion_tokens": 128,
+      "cached_tokens": 0
+    },
+    {
+      "id": "injected-4",
+      "role": "injected",
+      "status": "ok",
+      "ttft_ms": 182.807493,
+      "response_ms": 1209.520071,
+      "dispatch_lateness_ms": 0.72179,
+      "content_events": 128,
+      "content_gap_p95_ms": 10.246921899999998,
+      "content_gap_max_ms": 17.518431,
+      "aggregate_tpot_ms": 8.07732842519685,
+      "prompt_tokens": 3072,
+      "completion_tokens": 128,
+      "cached_tokens": 0
+    }
+  ],
+  "active_requests_spanning_injection": [
+    "active-1",
+    "active-3",
+    "active-2",
+    "active-0"
+  ],
+  "overlap_definition": "Active content delivery both before and after injected dispatch; engine logs still needed for scheduling claims",
+  "interference_content_gap_max_ms": 147.416373,
+  "completed_requests_per_second": 2.923947066062304,
+  "completion_tokens_per_second": 374.26522445597493,
+  "source": {
+    "code_commit": "0c88b430c3268be1d1fadc4375f113c39bc6d102",
+    "trace_sha256": "528433aa1cae59a348805c4e741e9fe915361c44c38ba82c7c0ced6e909ce129",
+    "raw_manifest_sha256": "6b8fff41baf4e7fb6d59eab0696fd061dbf5429424124cd2926a1904258ad397",
+    "device_id": "orin64-build-01",
+    "run_path": "runs/pilot-orin2-c4096-first",
+    "note": "Single unreplicated diagnostic observation; not a treatment comparison."
+  }
+}

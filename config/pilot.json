@@ -1,10 +1,14 @@
 {
   "schema_version": 1,
   "experiment_id": "s1-chunked-prefill-pilot",
-  "status": "proposed_unvalidated",
+  "status": "diagnostic_4096_feasible_other_treatments_pending",
   "runtime_reference": "runtime-reference.json",
   "treatments": {
-    "chunked_prefill_size": [256, 1024, 4096],
+    "chunked_prefill_size": [
+      256,
+      1024,
+      4096
+    ],
     "control_interpretation": "4096 is a single-chunk control for the bounded pilot inputs, not global chunking disablement"
   },
   "common_server": {
@@ -17,17 +21,21 @@
     "cuda_graph_max_bs": 32,
     "max_prefill_tokens": 4096,
     "random_seed": 20260807,
-    "mixed_prefill_decode_mode": "installed_default_to_record"
+    "mixed_prefill_decode_mode": "disabled_verified_source_and_orin2"
   },
   "workload": {
     "initial_decode_requests": 4,
-    "short_prompt_target_tokens": null,
+    "short_prompt_target_tokens": 256,
     "injected_long_prompt_target_tokens": 3072,
     "max_output_tokens": 128,
-    "injection_offset_ms": null,
-    "sampler": null,
+    "injection_offset_ms": 500,
+    "sampler": {
+      "temperature": 0,
+      "ignore_eos": true
+    },
     "record_actual_token_counts": true,
-    "minimize_unrelated_prefix_hits": true
+    "minimize_unrelated_prefix_hits": true,
+    "kind": "synthetic_native_completion_fixed_token_budget"
   },
   "measurement": {
     "classification": "diagnostic",
