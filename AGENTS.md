@@ -2,7 +2,8 @@
 
 Read `PLAN.md` when continuing work. Read `docs/EXPERIMENT.md` before changing the workload, treatment matrix, metrics, or research scope. Read `docs/DEVELOPMENT.md` before implementing device integration or coordinating checkouts.
 
-- Sai has authorized S1 preparation and prototyping while professor review is pending. Record that review separately from technical progress; do not invent professor approval or repeatedly request permission for already-authorized work.
+- Sai authorized end-to-end S1 implementation, both Orins, experiments, analysis, and an initial/submission-ready SRS paper on September 7, 2026. Proceed without waiting for professor review. Keep authentic advisor paperwork and author details as final submission requirements; never invent endorsements.
+- Before pausing, update `PLAN.md` with completed evidence, running process handles/log paths, failures, and the next executable step; commit and push coherent checkpoints. Verify a remote process before restarting a campaign. Keep credentials out of files, logs, and commits.
 - Keep this a fixed-chunk, independent-request characterization study. JouleServe retains the paused-session KV, tool-contention, and adaptive admission/controller questions.
 - Use `config/pilot.json` for proposed treatment values and `config/runtime-reference.json` for inherited artifact identity. A reference to an old successful run does not validate a new S1 configuration.
 - Make client/analysis code usable on Python 3.10+ without importing the GPU serving stack. Resolve project files relative to the checkout or explicit CLI arguments; keep device-specific paths in ignored local configuration.

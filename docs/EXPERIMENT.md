@@ -1,6 +1,6 @@
 # Experiment specification
 
-Status: proposed pilot, not a frozen publication protocol. Development is authorized by Sai; professor review of the contribution is pending.
+Status: proposed pilot, not a frozen publication protocol. Sai authorized the full project through an initial/submission-ready paper on September 7; professor review is not a work gate.
 
 ## Question and contribution
 
@@ -20,9 +20,11 @@ Vary only fixed prefill chunk size. Hold model, precision, attention backend, gr
 
 Start a small group of decodes, then inject a long-prompt request at a recorded offset. Calibrate that offset in the pilot so the arriving prefill actually overlaps active decoding. Reuse the same trace across treatments. Record intended arrival, actual dispatch, and resulting server/client delays; an open-loop arrival schedule must not silently become a completion-paced client.
 
-Tokenize the full chat input, including its template. The longest prompt plus output budget must fit the context limit. Unique leading request tokens should minimize unrelated prefix hits; record actual cached tokens and any shared template prefix. Output limits are caps, not guarantees that generation reaches those lengths.
+The implemented diagnostic trace uses native `/generate` with exact input IDs obtained from the pinned server's `/v1/tokenize`. A repeated field-report passage is truncated to the target input length; differing first tokens limit inter-request prefix reuse. This is synthetic completion load, with no chat template or task-quality claim. The longest prompt plus output budget must fit the context limit. Greedy sampling and `ignore_eos=true` hold the requested decode work fixed; verify actual counts. A later realistic-chat sensitivity trace must include its full template and natural stopping policy and be reported separately.
 
 For these bounded inputs, the largest chunk setting is a **single-chunk control**, not proof that chunking is globally disabled. The existing wrapper accepts positive chunk sizes and rejects the upstream negative disable sentinel. Keep mixed-prefill/decode mode at its installed default and verify actual scheduling behavior; this is not an exact reimplementation of Sarathi-Serve.
+
+The pinned source and live Orin-2 server both report `enable_mixed_chunk=false`. Smaller chunks alone therefore do not guarantee decoding between chunks. Test their observed scheduling and overhead at that fixed setting; see [the primary-source notes](RESEARCH.md). A mixed-mode intervention would be an explicitly separate treatment and require a validated adapter extension.
 
 ## Measurements and correctness
 

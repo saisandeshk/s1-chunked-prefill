@@ -39,7 +39,7 @@ Run directories include the device ID plus a unique run ID. Git is not a raw-dat
 
 ## Local configuration and Python
 
-Copy `config/local.example.json` to the ignored `config/local.json` and fill in machine-specific values when configuring a device. It is a configuration convention for the forthcoming adapter; no loader or environment bootstrap is implemented yet.
+Copy `config/local.example.json` to the ignored `config/local.json` and fill in machine-specific values when configuring a device. It is a configuration convention for the forthcoming adapter; no local-config loader or environment bootstrap is implemented yet.
 
 The package uses the standard `src/` layout and Python 3.10+. Create virtual environments on the workstation or Orin NVMe workspace. Once client implementation starts, install this package in editable mode in that local environment; add dependencies only when the implementation needs them. Keep the large serving stack in its existing container.
 
@@ -52,3 +52,16 @@ The forthcoming adapter must explicitly pass the image identity from `config/run
 The restricted wrapper currently accepts server specifications only inside approved JouleServe run/evidence paths. Its S1 launch records may therefore live there with a unique `srs-s1` identifier; cross-reference them from this repository's local run manifest. This is an operational boundary, not a reason to intermingle the two research codebases.
 
 Keep raw data, caches, temporary files, and build output on the NVMe workspace. Live device checks must establish headroom, endpoint ownership, model identity, and stable operating conditions before experiments. The existing device policy governs Docker and power actions; GitHub synchronization grants no additional privileges.
+
+## Client commands
+
+Run from the checkout with `PYTHONPATH=src` (no host dependencies):
+
+```bash
+PYTHONPATH=src python3 -B -m unittest discover -s tests -v
+PYTHONPATH=src python3 -B -m s1_chunked_prefill make-trace --output data/traces/pilot-v1.json
+PYTHONPATH=src python3 -B -m s1_chunked_prefill run --trace data/traces/pilot-v1.json --output-dir runs/pilot-001 --device-id orin64-build-01
+PYTHONPATH=src python3 -B -m s1_chunked_prefill summarize runs/pilot-001
+```
+
+The generator calls the device-local tokenizer, then saves exact token IDs for identical reuse across treatments. Commit the generated trace before running; clean runs are required by default. Output directories must be new. The runner retains per-request events, actual token counts, errors, input hash and code revision. Current commands are diagnostic primitives; warmup/cache control, runtime identity checks, telemetry and repeated campaign orchestration are the next implementation step.

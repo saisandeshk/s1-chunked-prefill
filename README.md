@@ -2,7 +2,7 @@
 
 A standalone HiPC SRS study of how **fixed prefill chunk size** affects ongoing decoding when long prompts arrive on a Jetson AGX Orin.
 
-**Current state:** workspace scaffold; benchmark implementation and new device experiments have not started. Sai authorized proceeding with S1 on September 6, 2026 while professor review is pending. That review does not block the authorized preparation and prototype work.
+**Current state:** streaming client and synthetic workload generator implemented; device bring-up and diagnostic pilot in progress. Sai authorized the full project through an initial/submission-ready SRS paper on September 7, 2026, without waiting for professor review. See `PLAN.md` for current evidence and continuation steps.
 
 ## Start here
 
