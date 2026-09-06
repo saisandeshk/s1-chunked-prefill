@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "experiment_id": "s1-chunked-prefill-pilot",
+  "status": "proposed_unvalidated",
+  "runtime_reference": "runtime-reference.json",
+  "treatments": {
+    "chunked_prefill_size": [256, 1024, 4096],
+    "control_interpretation": "4096 is a single-chunk control for the bounded pilot inputs, not global chunking disablement"
+  },
+  "common_server": {
+    "context_length": 4096,
+    "mem_fraction_static": 0.25,
+    "kv_cache_dtype": "auto",
+    "attention_backend": "flashinfer",
+    "max_running_requests": 8,
+    "max_total_tokens": 8192,
+    "cuda_graph_max_bs": 32,
+    "max_prefill_tokens": 4096,
+    "random_seed": 20260807,
+    "mixed_prefill_decode_mode": "installed_default_to_record"
+  },
+  "workload": {
+    "initial_decode_requests": 4,
+    "short_prompt_target_tokens": null,
+    "injected_long_prompt_target_tokens": 3072,
+    "max_output_tokens": 128,
+    "injection_offset_ms": null,
+    "sampler": null,
+    "record_actual_token_counts": true,
+    "minimize_unrelated_prefix_hits": true
+  },
+  "measurement": {
+    "classification": "diagnostic",
+    "telemetry_interval_ms": 500,
+    "repeated_blocks": null,
+    "slo_thresholds": null,
+    "practical_effect_margin": null,
+    "publication_protocol_frozen": false
+  }
+}

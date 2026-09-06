@@ -1,0 +1,7 @@
+{
+  "device_id": "workstation",
+  "endpoint": "http://127.0.0.1:30001",
+  "jouleserve_root": null,
+  "runs_root": "runs",
+  "note": "Template only. Set actual device/path values in ignored local.json; no config loader is implemented yet."
+}

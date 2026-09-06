@@ -1,0 +1,45 @@
+# Python environments, build output, and local tooling caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+
+# Machine-specific settings and credentials
+config/local.json
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.DS_Store
+.idea/
+.vscode/
+
+# Raw run data, downloads, model artifacts, and runtime caches
+runs/*
+!runs/.gitkeep
+data/raw/
+data/downloads/
+models/
+cache/
+tmp/
+*.log
+*.safetensors
+*.gguf
+*.pt
+*.pth
+*.onnx
+*.engine
+*.plan
+*.tar
+*.tar.gz
+*.whl

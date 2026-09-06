@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "reference_kind": "inherited_jouleserve_snapshot",
+  "snapshot_date": "2026-09-06",
+  "s1_live_validation_performed": false,
+  "source": {
+    "repository": "https://github.com/saisandeshk/JouleServe.git",
+    "checkout_commit_at_snapshot": "6c29901d02387652b41db1dd9d78000af7f944cc",
+    "status_updated_utc": "2026-08-23T14:55:32Z",
+    "files_sha256": {
+      "config/runtimes/sglang-0.5.16-orin.env": "434ad3b27aa2e0827839734579925bf32da6bb0cdae31dfdaca2296a0aeb0018",
+      "config/status/sglang-0.5.16-orin.yaml": "41b5e0c5ea2c39a253732a549ececcdd13c903dc3312974ca18511bbea5b6f12",
+      "config/builds/sglang-0.5.16-orin.yaml": "732763a7710bf5d270ca865ed649a32041d6494f2513df2e62b5e816fb1d8fe5"
+    }
+  },
+  "runtime": {
+    "lock_id": "sglang-0.5.16-orin-jp621-cu126-sm87-v1",
+    "engine": "sglang",
+    "version": "0.5.16",
+    "engine_commit": "fdebc938f7f4d16fe6b9f55dcd9a767cf0899ea1",
+    "local_image_id": "sha256:05119cc6b86889f72fc7f64cba32a381a71c514babce4a52668c27aa667ff7a8",
+    "docker_archive_content_sha256": "2c832878035ce497cd159d13d6799d1c6541eea61adef67d3195e6cad7124808",
+    "registry_manifest_digest": null,
+    "classification": "local_functional_research_candidate_not_publication_baseline",
+    "publication_eligible": false
+  },
+  "model": {
+    "id": "Qwen/Qwen2.5-0.5B-Instruct",
+    "revision": "7ae557604adf67be50417f59c2c2f167def9a775"
+  },
+  "platform": {
+    "container_platform": "linux/arm64",
+    "jetpack": "6.2.1",
+    "l4t": "36.4.4",
+    "cuda": "12.6",
+    "gpu_arch": "sm87"
+  },
+  "recorded_stack": {
+    "sglang_kernel": "0.4.5",
+    "pytorch": "2.11.0",
+    "triton": "3.7.0",
+    "flashinfer": "0.6.14",
+    "torchao": "0.17.0",
+    "xgrammar": "0.2.1",
+    "transformers": "5.12.1"
+  },
+  "notes": [
+    "This snapshot identifies inherited artifacts; it does not validate the proposed S1 pilot or current device availability.",
+    "The local Docker image ID is not a registry pull digest. Verify local availability through the approved device workflow.",
+    "The archive content hash is distinct from a raw Docker archive file hash.",
+    "Source paths are provenance within JouleServe, not required relative paths in this checkout."
+  ]
+}
