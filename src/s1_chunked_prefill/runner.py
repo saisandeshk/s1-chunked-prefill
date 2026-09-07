@@ -23,7 +23,7 @@ def write_json(path, value):
     tmp.replace(path)
 
 
-def run_trace(endpoint, trace_path, output_dir, *, device_id, timeout=120, allow_dirty=False):
+def run_trace(endpoint, trace_path, output_dir, *, device_id, timeout=120, allow_dirty=False, classification="diagnostic"):
     trace_path = Path(trace_path)
     trace = json.loads(trace_path.read_text())
     validate_trace(trace)
@@ -44,7 +44,7 @@ def run_trace(endpoint, trace_path, output_dir, *, device_id, timeout=120, allow
             for directory in ("src", "scripts", "config"):
                 archive.add(root / directory, arcname=directory, filter=lambda info: None if info.name.endswith("local.json") or "__pycache__" in info.name else info)
     (output_dir / "trace.json").write_bytes(trace_path.read_bytes())
-    manifest = {"schema_version": 1, "classification": "diagnostic",
+    manifest = {"schema_version": 1, "classification": classification,
                 "status": "running", "device_id": device_id, "code_commit": revision,
                 "dirty": bool(dirty), "trace_sha256": digest(trace_path),
                 "started_utc": datetime.now(timezone.utc).isoformat(),

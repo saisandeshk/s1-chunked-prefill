@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "experiment_id": "s1-frozen-campaign-v1",
+  "status": "frozen_after_two_device_pilot",
+  "runtime_reference": "runtime-reference.json",
+  "treatments": {
+    "chunked_prefill_size": [
+      256,
+      1024,
+      4096
+    ],
+    "control_interpretation": "4096 is a single-chunk control for the bounded pilot inputs, not global chunking disablement"
+  },
+  "common_server": {
+    "context_length": 4096,
+    "mem_fraction_static": 0.25,
+    "kv_cache_dtype": "auto",
+    "attention_backend": "flashinfer",
+    "max_running_requests": 8,
+    "max_total_tokens": 8192,
+    "cuda_graph_max_bs": 32,
+    "max_prefill_tokens": 4096,
+    "random_seed": 20260807,
+    "mixed_prefill_decode_mode": "disabled_verified_source_and_orin2"
+  },
+  "workload": {
+    "initial_decode_requests": 4,
+    "short_prompt_target_tokens": 256,
+    "injected_long_prompt_target_tokens": 3072,
+    "max_output_tokens": 128,
+    "injection_offset_ms": 500,
+    "sampler": {
+      "temperature": 0,
+      "ignore_eos": true
+    },
+    "record_actual_token_counts": true,
+    "minimize_unrelated_prefix_hits": true,
+    "kind": "synthetic_native_completion_fixed_token_budget"
+  },
+  "measurement": {
+    "classification": "new_measurements_under_s1_protocol_v1",
+    "telemetry_interval_ms": 500,
+    "repeated_blocks": 12,
+    "slo_thresholds": null,
+    "practical_effect_margin": 0.1,
+    "publication_protocol_frozen": true,
+    "measured_repeats_per_cell_workload": 2,
+    "warmup_repeats_per_cell_workload": 2,
+    "order_seed": 20260908,
+    "protocol": "docs/PROTOCOL.md",
+    "quality_limits": {
+      "require_exact_prompt_tokens": true,
+      "maximum_temperature_millicelsius": {
+        "cpu-thermal": 75000,
+        "gpu-thermal": 75000
+      }
+    }
+  },
+  "runtime_requirements": {
+    "enable_mixed_chunk": false,
+    "enable_dynamic_chunking": false,
+    "stream_interval": 1,
+    "incremental_streaming_output": false,
+    "enable_cache_report": true,
+    "dtype": "auto",
+    "quantization": null,
+    "disable_radix_cache": false
+  }
+}

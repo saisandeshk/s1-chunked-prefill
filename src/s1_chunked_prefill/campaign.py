@@ -56,6 +56,7 @@ def verify_server(info, config, reference, chunk):
                     enable_dynamic_chunking=False, version=reference["runtime"]["version"],
                     served_model_name=reference["model"]["id"],
                     max_total_num_tokens=config["common_server"]["max_total_tokens"])
+    expected.update(config.get("runtime_requirements", {}))
     # New SGLang spelling of the compatibility launch flag.
     graph = info.get("cuda_graph_max_bs_decode", info.get("cuda_graph_max_bs"))
     if graph != config["common_server"]["cuda_graph_max_bs"]:
@@ -119,13 +120,16 @@ def snapshot():
     return stats
 
 
-def quality(summary, trace, before, after):
+def quality(summary, trace, before, after, limits=None):
+    limits = limits or {}
     issues = []
     if summary["manifest_status"] != "complete":
         issues.append("request_failure")
     expectations = {r["id"]: r for r in trace["requests"]}
     for metric in summary["request_metrics"]:
         expected = expectations[metric["id"]]
+        if limits.get("require_exact_prompt_tokens") and metric["prompt_tokens"] != len(expected["payload"]["input_ids"]):
+            issues.append("prompt_count_mismatch:" + metric["id"])
         if metric["completion_tokens"] != expected["payload"]["sampling_params"]["max_new_tokens"]:
             issues.append("output_count_mismatch:" + metric["id"])
         if metric["cached_tokens"] != 0:
@@ -144,6 +148,12 @@ def quality(summary, trace, before, after):
             issues.append("host_" + key + "_changed")
     if before["services"] != after["services"]:
         issues.append("service_state_changed")
+    for name, maximum in limits.get("maximum_temperature_millicelsius", {}).items():
+        values = [host.get("thermal_millicelsius", {}).get(name) for host in (before, after)]
+        if any(value is None for value in values):
+            issues.append("required_temperature_missing:" + name)
+        elif max(values) > maximum:
+            issues.append("temperature_limit_exceeded:" + name)
     return {"diagnostic_valid": not issues, "issues": issues}
 
 
@@ -151,6 +161,13 @@ def execute(args):
     config = json.loads(args.config.read_text())
     reference_path = args.config.parent / config["runtime_reference"]
     reference = json.loads(reference_path.read_text())
+    measurement = config.get("measurement", {})
+    classification = measurement.get("classification", "diagnostic")
+    if measurement.get("publication_protocol_frozen"):
+        for actual, key in ((args.blocks, "repeated_blocks"), (args.repeats, "measured_repeats_per_cell_workload"),
+                            (args.warmups, "warmup_repeats_per_cell_workload"), (args.seed, "order_seed")):
+            if actual != measurement[key]:
+                raise ValueError(f"Campaign arguments differ from frozen {key}")
     if args.blocks <= 0 or args.repeats <= 0 or args.warmups <= 0:
         raise ValueError("Blocks, repeats and warmups must be positive")
     if not str(ROOT).startswith("/media/ssd/saisandesh/projects/"):
@@ -169,7 +186,7 @@ def execute(args):
         lock.truncate()
         lock.write(str(os.getpid()))
         lock.flush()
-        state = {"schema_version": 1, "classification": "diagnostic", "pid": os.getpid(),
+        state = {"schema_version": 1, "classification": classification, "pid": os.getpid(),
                  "status": "running", "device_id": args.device_id,
                  "code_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
                  "config_sha256": digest(args.config), "runtime_reference_sha256": digest(reference_path),
@@ -192,6 +209,10 @@ def execute(args):
                 write_json(cell_dir / "admission.json", pre)
                 if pre["available_memory_kib"] < 8 * 1024**2 or pre["free_disk_bytes"] < 10 * 1024**3:
                     raise RuntimeError("Insufficient memory or SSD headroom")
+                for name, maximum in config.get("measurement", {}).get("quality_limits", {}).get("maximum_temperature_millicelsius", {}).items():
+                    value = pre["thermal_millicelsius"].get(name)
+                    if value is None or value > maximum:
+                        raise RuntimeError(f"Thermal admission failed for {name}: {value}")
                 # Refuse contention with any existing Docker container. Never stop it.
                 if pre["containers"]["exit_code"] != 0 or len(pre["containers"]["stdout"].strip().splitlines()) > 1:
                     raise RuntimeError("Container inventory unavailable or another container is running")
@@ -225,10 +246,11 @@ def execute(args):
                             before = snapshot()
                             run_id = f"{'warmup' if repeat < 0 else 'repeat'}-{abs(repeat):02d}-{trace_path.stem}"
                             run_dir = cell_dir / run_id
-                            run_trace(endpoint, trace_path, run_dir, device_id=args.device_id)
+                            run_trace(endpoint, trace_path, run_dir, device_id=args.device_id, classification=classification)
                             after = snapshot()
                             summary = summarize_run(run_dir)
-                            summary["quality"] = quality(summary, json.loads(trace_path.read_text()), before, after)
+                            summary["quality"] = quality(summary, json.loads(trace_path.read_text()), before, after,
+                                                         config.get("measurement", {}).get("quality_limits"))
                             write_json(run_dir / "summary.json", summary)
                             write_json(run_dir / "host-before.json", before)
                             write_json(run_dir / "host-after.json", after)

@@ -43,3 +43,6 @@ tmp/
 *.tar
 *.tar.gz
 *.whl
+
+# TeX intermediates; keep reviewed PDFs outside this build directory
+paper/build/

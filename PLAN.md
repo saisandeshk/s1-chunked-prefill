@@ -2,7 +2,7 @@
 
 Updated: September 7, 2026.
 
-State: **end-to-end project authorized; client implemented; diagnostic device bring-up underway.** The deliverable remains an evidence-backed initial/submission-ready SRS paper. Professor review does not block work; authentic submission paperwork remains required.
+State: **two-device diagnostic pilot complete; repeated protocol frozen; paper source compiles.** The deliverable remains an evidence-backed initial/submission-ready SRS paper. Professor review does not block work; authentic submission paperwork remains required.
 
 ## Completed
 
@@ -26,24 +26,23 @@ Scaffold verification: all three JSON configs and package metadata parse; the pa
 - [x] Add meaningful local tests using fragmented SSE fixtures, empty/role-only events, interrupted streams, and multi-token content chunks.
 - [x] Implement a reproducible mixed-arrival trace: active decodes followed by an injected long prompt; record intended and actual dispatch times.
 - [x] Implement an explicit adapter to the existing runtime controller with fixed common launch parameters and per-treatment chunk sizes.
-- [ ] Establish actual token lengths, comparable prefix-cache behavior, common token-pool feasibility, and real prefill/decode overlap on one Orin.
-- [ ] Run the three-treatment diagnostic pilot and inspect whether an interpretable effect exists.
+- [x] Establish exact token lengths, zero cached-token reuse, common token-pool feasibility, and active decoding spanning injection for all three treatments on both Orins.
+- [x] Complete the three-treatment diagnostic pilot on both boards: 72 traces including warmup, 36 measured, zero validity exclusions.
 
 ## Before a claim-bearing campaign
 
-- [ ] Freeze workload, offered loads, measurement boundaries, repetitions, thermal/service state, and practical effect margin.
-- [ ] Freeze the S1 measurement and reproducibility contract using verified artifacts; distinguish its evidence from historical JouleServe functional diagnostics.
+- [x] Freeze workload, measurement, 12 paired blocks per board, operating-state policy, and 10% practical-effect margin in `docs/PROTOCOL.md` and `config/campaign-v1.json`.
+- [x] Freeze the S1 measurement and reproducibility contract using exact artifacts; retain historical and pilot diagnostics separately.
 - [ ] Run paired treatment blocks, retain invalid/failed runs, and repeat a representative subset on the second Orin.
 - [ ] Produce traceable plots, a bounded result, source/PDF paper, and submission checklist (including authentic author details, advisor undertaking, and AI disclosure).
 
 ## Current checkpoint and next actions
 
-- Thirteen local tests pass, including a real fragmented HTTP/SSE server and overlapping arrivals. Use `PYTHONPATH=src python3 -B -m unittest discover -s tests -v`.
-- Both Orins have Python 3.10.12. Orin-1 has ~58 GiB available RAM and Orin-2 ~49 GiB; both had no running Docker containers at admission. Orin-2 reports active K3s/jtop; preserve and record service state.
-- Orin-1's exact runtime image was absent despite historical records. Its ten-file model manifest passed on September 7 local time. The exact-image deployment finished and image identity was verified; serving bring-up also passed on the restored image. Import evidence: `/media/ssd/saisandesh/telemetry/sglang-0.5.16-deployment/orin64-ref-01/import/20260906T184409Z`.
-- The Orin-2 bring-up container `jouleserve-srs-s1-c4096` was stopped and its evidence finalized before the campaign. Its controller evidence is in the JouleServe checkout at `runs/srs-s1-bringup-20260907-c4096`; S1 bring-up log/config are in `runs/bringup-20260907/`. Live server has `enable_mixed_chunk=false`, context 4096 and token pool 8192.
-- Orin-2 first diagnostic (`runs/pilot-orin2-c4096-first`) passed 5/5 requests, exact 256/3072 input and 128 output counts, zero cached tokens, four active decodes spanning injection. Scheduler log corroborates 4 running requests during the injected prefill. Curated summary: `results/bringup/orin2-first-trace.json`; imported raw hashes verified locally.
-- Versioned traces: `data/traces/mixed-v1.json` (500 ms injection), `decode-only-v1.json`, `prefill-only-v1.json`. Native synthetic workload; no chat quality claims.
-- Guarded diagnostic campaign implemented: randomized treatment blocks, live config checks, shape warmups, cache flush plus cached-token validation, telemetry, host snapshots, durable per-run/cell status, owned cleanup, port lock. Next: sync and exercise it on both devices, starting with one block before larger campaigns.
-- Both bring-up containers were stopped. The first detached campaign (`runs/pilot-block0-v1`) failed admission on both boards before launching any cell: powered-down thermal zones return EAGAIN, which Python 3.10 TextIOWrapper surfaced as a TypeError. Live revalidation confirmed both driver PIDs absent and no running containers. Fixed snapshots now retain per-zone errors alongside readable CPU/GPU temperatures; regression test passes. Next attempt must use a new output path (`pilot-block0-v2`), retaining v1 failures.
-- No claim-bearing campaign or measured scientific result is complete. The goal remains active through paper generation and verification.
+- Sixteen tests pass locally. The earlier 13-test version passed on both Orins; sync/test the current checkpoint before the repeated campaign.
+- Both pilot drivers (`pilot-block0-v2`, Orin-1 PID 70301, Orin-2 PID 145767) are terminal, all cells complete, and both boards have no running Docker containers. Each campaign was sealed with 417 files, including copied controller evidence. Raw state lives in each S1 checkout at `runs/pilot-block0-v2`; imports are under workstation `runs/imported/orin1/` and `orin2/`. Remote sealing added controller records after the first workstation import, so refresh imports and verify their SHA256SUMS before final archival analysis.
+- Curated verified pilot analysis: `results/pilot-v2/report.json` and `trials.csv`. One independent block per board, two measured repeats per workload/cell; no bootstrap intervals. Smallest chunks show roughly 2.4x peak active-stream stalls versus 4096, but this is a pilot, excluded from the repeated estimates.
+- The first attempt (`pilot-block0-v1`) failed before launching cells on unavailable CV thermal sensors. The fixed code records EAGAIN while preserving CPU/GPU temperatures; failed evidence is retained. Orin-1's missing runtime image was restored and identity/model/serving verified. Neither condition remains a blocker.
+- Next: commit/push this checkpoint; sync both Orins, verify tests and clean state, and launch a new detached campaign at `runs/campaign-v1` using `--config config/campaign-v1.json --blocks 12 --repeats 2 --warmups 2 --seed 20260908` and all three committed traces. Record driver PID/log paths here immediately. Never update a checkout while its campaign is running.
+- `paper/main.tex` and `results.tex` form a methods/validation working draft. `bash scripts/build-paper.sh` succeeds with pinned Tectonic 0.17.0; current PDF has 2 US-letter pages. It is not yet the final manuscript. Replace progress text with verified repeated results, add figures, inspect rendering/fonts/margins and citations, then retain the reviewed PDF outside `paper/build/`.
+- Author name/program/affiliation/coauthors were requested asynchronously and remain pending. Advisor undertaking is an authentic submission artifact, not a blocker to experiments or drafting. Never generate a signature or claim student review occurred.
+- The full goal remains active through repeated-data verification, final analysis/figures, and the evidence-backed initial/submission-ready paper. A running campaign or compiling draft is not completion.

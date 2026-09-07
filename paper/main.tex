@@ -1,0 +1,49 @@
+\documentclass[conference,10pt,letterpaper]{IEEEtran}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\title{Measuring Prefill Interference in Streamed LLM Serving on Jetson Orin}
+\author{\IEEEauthorblockN{Working draft: author details pending}
+\IEEEauthorblockA{Prepared for author review; not ready for submission}}
+\begin{document}
+\maketitle
+\begin{abstract}
+A long prompt can interrupt requests that are already generating text on an edge language-model server. We investigate how fixed prefill chunk size changes this interference on two Jetson AGX Orin systems. Our experiment reuses exact token inputs, injects a long request into ongoing decoding, and records streamed delivery times, actual token counts, cache reuse, runtime configuration, and host state. The design separates splitting prefill from mixing prefill and decoding: the pinned SGLang runtime disables mixed chunks by default, so a smaller chunk does not by itself establish stall-free scheduling. This working draft describes the implemented measurement system and initial functional validation. Repeated treatment comparisons are in progress; it does not yet establish a performance benefit or a general edge-serving result.
+\end{abstract}
+
+\section{Motivation and research question}
+Edge deployment places model execution and host activity on a resource-constrained platform. When an arriving prompt requires substantial prefill work, ongoing streamed responses may pause. A chunk-size setting is an accessible tuning parameter, but its effect depends on the scheduler that consumes those chunks.
+
+Sarathi-Serve combines chunked prefill with stall-free scheduling to improve the throughput--latency tradeoff~\cite{sarathi}. Chunk splitting alone is therefore an incomplete description of the policy. Arya and Simmhan characterize model inference latency, throughput, and power on edge accelerators~\cite{arya}. Our narrower question concerns arrival-time interference in an online serving runtime: \emph{how does fixed prefill chunk size affect an arriving request and concurrent output streams on the stated Orin configuration?} We characterize an existing mechanism rather than propose a new scheduler or claim that chunking is novel.
+
+\section{Experimental design}
+\textbf{Runtime and treatments.} The inherited source-built SGLang 0.5.16 artifact serves Qwen2.5-0.5B-Instruct at a pinned model revision on Jetson AGX Orin 64GB systems. The runtime image, source revision, and model provenance are recorded in the artifact repository. Treatments use prefill chunks of 256, 1,024, and 4,096 tokens, with a common 4,096-token context, 8,192-token allocation pool, eight-request cap, and identical attention and CUDA-graph settings. For the bounded input, 4,096 is a single-chunk control; it does not disable chunking globally.
+
+The pinned scheduler prefers available prefill work, while combining a running decode batch with new prefill requires a separate mixed-chunk setting~\cite{sglang}. Source inspection and initial live configuration checks find this setting false. We preserve that setting across the initial comparison. Consequently, neither CPU/GPU scheduler overlap nor a smaller prefill chunk proves that decode steps occur between chunks.
+
+\textbf{Workload and controls.} Four independent requests each receive 256 input tokens and a 128-token output budget. A 3,072-token prompt arrives 500\,ms after the initial dispatch epoch. Inputs are obtained from the pinned server tokenizer and versioned as exact token IDs. A repeated field-report passage provides synthetic completion load; distinct leading tokens limit shared-prefix reuse. Greedy decoding with EOS stopping suppressed fixes the requested output work. This is a controlled load generator, not a natural-dialogue quality benchmark. Decode-only and prefill-only traces retain the corresponding requests as controls.
+
+\textbf{Measurement.} A host client schedules arrivals against a monotonic clock independently of prior completions. It records intended and actual dispatch, first nonempty content, subsequent content deliveries, completion metadata, terminal markers, and errors. Content delivery events may contain multiple tokens; their gaps are client-observed delivery gaps, not an asserted engine token clock. Aggregate output-token counts come from server metadata. We retain per-request TTFT, response time, delivery gaps, successful work, and the largest active-stream gap intersecting the injected request's dispatch-to-first-content window.
+
+The campaign adapter randomizes treatment order within blocks, warms each workload shape, flushes the owned server's cache between trials, and checks actual cached-token counts. It records host snapshots and telemetry and retains failed trials. Diagnostic validity checks cover request errors, output counts, unintended cache reuse, dispatch lateness, swap/OOM changes, service-state changes, and active deliveries spanning injection. Scheduler logs provide additional evidence of real running requests at prefill. Individual token events are not independent statistical repetitions.
+
+\section{Validation and current evidence}
+\input{results.tex}
+
+\section{Limits and next steps}
+The current scope is one small model, a bounded synthetic arrival pattern, and one pinned runtime configuration. Two Orins test repeatability within this platform class; they do not isolate shared memory against a discrete GPU architecture. The boards' background service states differ, so treatment comparisons must be paired within each board and the states reported. Monitored rail energy is secondary; no wall-plug or per-token energy claim follows from the diagnostic collector.
+
+Before drawing a comparative conclusion, we will freeze the measurement protocol, inspect warmup and scheduling effects, collect independent repeated blocks, and report uncertainty alongside all exclusions. A null or adverse result will retain its configuration-specific meaning. The final manuscript must replace this progress account with the verified measurements and their limitations.
+
+\section*{AI assistance disclosure}
+OpenAI Codex~\cite{codex} assisted with implementation, experiment orchestration, analysis preparation, and prose in all sections. Hardware measurements are recorded observations, not generated values. This is a working draft requiring student review and an authentic advisor undertaking before submission.
+
+\begin{thebibliography}{4}
+\bibitem{sarathi} A. Agrawal et al., ``Taming throughput-latency tradeoff in LLM inference with Sarathi-Serve,'' in \emph{OSDI}, 2024, pp. 117--134.
+\bibitem{arya} M. Arya and Y. Simmhan, ``Understanding the performance and power of LLM inferencing on edge accelerators,'' arXiv:2506.09554v2, 2025.
+\bibitem{sglang} SGLang Contributors, ``Server arguments and scheduler,'' source revision \texttt{fdebc938f7f4}, 2026. [Online]. Available: \url{https://github.com/sgl-project/sglang}
+\bibitem{codex} OpenAI, ``Codex,'' accessed Sep. 7, 2026. [Online]. Available: \url{https://openai.com/codex/}
+\end{thebibliography}
+\end{document}
