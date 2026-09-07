@@ -65,3 +65,19 @@ PYTHONPATH=src python3 -B -m s1_chunked_prefill summarize runs/pilot-001
 ```
 
 The generator calls the device-local tokenizer, then saves exact token IDs for identical reuse across treatments. Commit the generated trace before running; clean runs are required by default. Output directories must be new. The runner retains per-request events, actual token counts, errors, input hash and code revision. Current commands are diagnostic primitives; warmup/cache control, runtime identity checks, telemetry and repeated campaign orchestration are the next implementation step.
+
+## Repeated campaigns and interruption recovery
+
+Read `PLAN.md` for the current run and live process handles before executing device commands. `docs/PROTOCOL.md` and `config/campaign-v1.json` freeze the repeated study. The validated invocation from each clean Orin checkout is:
+
+```bash
+PYTHONPATH=src python3 -B -m s1_chunked_prefill.campaign \
+  --config config/campaign-v1.json \
+  --traces data/traces/mixed-v1.json data/traces/decode-only-v1.json data/traces/prefill-only-v1.json \
+  --output runs/campaign-v1-r2 --device-id <logical-device-id> \
+  --blocks 12 --repeats 2 --warmups 2 --seed 20260908
+```
+
+This invocation is already running as a detached process; it is a reference, not an instruction to launch a duplicate. Existing output paths are deliberately rejected. Inspect the recorded PID and its command, campaign JSON, driver log, and owned container before deciding whether a run is active or failed. Keep each device checkout at the recorded commit until its process terminates. Local documentation/analysis may advance without pulling those changes into a running checkout.
+
+Raw evidence remains on both Orins and is copied with checksums for local analysis. Successful process completion does not replace validity, provenance, telemetry, or paper-claim review.
