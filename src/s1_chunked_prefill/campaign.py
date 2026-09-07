@@ -81,6 +81,26 @@ def flush_cache(endpoint):
     time.sleep(.2)
 
 
+def thermal_snapshot(root=Path("/sys/class/thermal")):
+    values, errors = {}, {}
+    for path in sorted(root.glob("thermal_zone*/temp")):
+        name = path.parent.name
+        try:
+            name = (path.parent / "type").read_text().strip()
+            # Some powered-down Jetson zones return EAGAIN. TextIOWrapper on
+            # Python 3.10 turns that into an opaque None/bytes TypeError;
+            # os.read preserves the actual errno for the evidence record.
+            fd = os.open(path, os.O_RDONLY)
+            try:
+                values[name] = int(os.read(fd, 4096))
+            finally:
+                os.close(fd)
+        except (OSError, ValueError) as exc:
+            errors[name] = {"type": type(exc).__name__, "errno": getattr(exc, "errno", None),
+                            "message": str(exc)}
+    return values, errors
+
+
 def snapshot():
     mem = Path("/proc/meminfo").read_text()
     available = int(next(line.split()[1] for line in mem.splitlines() if line.startswith("MemAvailable:")))
@@ -95,9 +115,7 @@ def snapshot():
     for key, command in commands.items():
         result = subprocess.run(command, text=True, capture_output=True, timeout=30)
         stats[key] = {"exit_code": result.returncode, "stdout": result.stdout, "stderr": result.stderr}
-    stats["thermal_millicelsius"] = {
-        (p.parent / "type").read_text().strip(): int(p.read_text())
-        for p in Path("/sys/class/thermal").glob("thermal_zone*/temp")}
+    stats["thermal_millicelsius"], stats["thermal_read_errors"] = thermal_snapshot()
     return stats
 
 

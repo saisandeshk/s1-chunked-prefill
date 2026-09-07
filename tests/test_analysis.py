@@ -1,10 +1,28 @@
 import unittest
+import errno
+from pathlib import Path
+import tempfile
+from unittest.mock import patch
 
 from s1_chunked_prefill.analysis import quantile, request_metrics
-from s1_chunked_prefill.campaign import quality, treatment_order, verify_server
+from s1_chunked_prefill.campaign import quality, thermal_snapshot, treatment_order
 
 
 class AnalysisTests(unittest.TestCase):
+    def test_temporarily_unavailable_sensor_preserves_other_temperatures(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for i, name in enumerate(('cpu-thermal', 'offline-zone')):
+                zone = root / f'thermal_zone{i}'
+                zone.mkdir()
+                (zone / 'type').write_text(name)
+                (zone / 'temp').write_text('51000')
+            with patch('s1_chunked_prefill.campaign.os.read',
+                       side_effect=[b'51000\n', BlockingIOError(errno.EAGAIN, 'temporarily unavailable')]):
+                values, errors = thermal_snapshot(root)
+            self.assertEqual(values, {'cpu-thermal': 51000})
+            self.assertEqual(errors['offline-zone']['errno'], errno.EAGAIN)
+
     def test_delivery_events_are_not_counted_as_tokens(self):
         record = {"id": "a", "role": "active", "status": "ok", "dispatch_ns": 1_000_000,
                   "intended_dispatch_ns": 0, "completed_ns": 21_000_000,
