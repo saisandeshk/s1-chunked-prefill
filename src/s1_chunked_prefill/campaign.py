@@ -157,6 +157,18 @@ def quality(summary, trace, before, after, limits=None):
     return {"diagnostic_valid": not issues, "issues": issues}
 
 
+def check_admission(pre, config):
+    if pre["available_memory_kib"] < 8 * 1024**2 or pre["free_disk_bytes"] < 10 * 1024**3:
+        raise RuntimeError("Insufficient memory or SSD headroom")
+    limits = config.get("measurement", {}).get("quality_limits", {})
+    for thermal_name, maximum in limits.get("maximum_temperature_millicelsius", {}).items():
+        value = pre["thermal_millicelsius"].get(thermal_name)
+        if value is None or value > maximum:
+            raise RuntimeError(f"Thermal admission failed for {thermal_name}: {value}")
+    if pre["containers"]["exit_code"] != 0 or len(pre["containers"]["stdout"].strip().splitlines()) > 1:
+        raise RuntimeError("Container inventory unavailable or another container is running")
+
+
 def execute(args):
     config = json.loads(args.config.read_text())
     reference_path = args.config.parent / config["runtime_reference"]
@@ -207,15 +219,7 @@ def execute(args):
                 write_json(output / "campaign.json", state)
                 pre = snapshot()
                 write_json(cell_dir / "admission.json", pre)
-                if pre["available_memory_kib"] < 8 * 1024**2 or pre["free_disk_bytes"] < 10 * 1024**3:
-                    raise RuntimeError("Insufficient memory or SSD headroom")
-                for name, maximum in config.get("measurement", {}).get("quality_limits", {}).get("maximum_temperature_millicelsius", {}).items():
-                    value = pre["thermal_millicelsius"].get(name)
-                    if value is None or value > maximum:
-                        raise RuntimeError(f"Thermal admission failed for {name}: {value}")
-                # Refuse contention with any existing Docker container. Never stop it.
-                if pre["containers"]["exit_code"] != 0 or len(pre["containers"]["stdout"].strip().splitlines()) > 1:
-                    raise RuntimeError("Container inventory unavailable or another container is running")
+                check_admission(pre, config)
                 collector = None
                 collector_log = None
                 started = False

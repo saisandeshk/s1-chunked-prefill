@@ -1,0 +1,24 @@
+{
+  "report_sha256": "bfff60609192f33af3e2cfe14bacc3c5c7e7e727433f5d44671363faea1b8ff5",
+  "script_sha256": "72cd43de9dcbec7caa3386220ed30cd6b5bc4c02814c2771f3e3d15525d85c73",
+  "matplotlib_version": "3.10.7+dfsg1",
+  "numpy_version": "2.5.2",
+  "point_definition": "Mean of valid measured traces in one independent treatment block",
+  "line_definition": "Arithmetic mean across displayed blocks; not a fitted trend or confidence interval",
+  "sources": [
+    {
+      "device": "orin64-ref-01",
+      "campaign": "pilot-block0-v2",
+      "campaign_sha256": "11207cca4280bf69699a9a317e09ede58788231f652fa481ec1cbcfdd6272b33",
+      "code_commit": "31a4b294f8e14f5ec38b4b14a6d11c0d535ace77",
+      "classification": "diagnostic"
+    },
+    {
+      "device": "orin64-build-01",
+      "campaign": "pilot-block0-v2",
+      "campaign_sha256": "2583ad4e4e468befada4afab6f76de76623def5d362215a17332f04583e91f50",
+      "code_commit": "31a4b294f8e14f5ec38b4b14a6d11c0d535ace77",
+      "classification": "diagnostic"
+    }
+  ]
+}

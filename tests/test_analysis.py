@@ -5,10 +5,25 @@ import tempfile
 from unittest.mock import patch
 
 from s1_chunked_prefill.analysis import quantile, request_metrics
-from s1_chunked_prefill.campaign import quality, thermal_snapshot, treatment_order
+from s1_chunked_prefill.campaign import check_admission, quality, thermal_snapshot, treatment_order
 
 
 class AnalysisTests(unittest.TestCase):
+    def test_frozen_admission_requires_readable_cool_gpu_and_idle_container_inventory(self):
+        config = {'measurement': {'quality_limits': {'maximum_temperature_millicelsius': {'gpu-thermal': 75000}}}}
+        pre = {'available_memory_kib': 16 * 1024**2, 'free_disk_bytes': 20 * 1024**3,
+               'thermal_millicelsius': {'gpu-thermal': 50000},
+               'containers': {'exit_code': 0, 'stdout': 'CONTAINER ID IMAGE\n'}}
+        check_admission(pre, config)
+        for value in (None, 76000):
+            pre['thermal_millicelsius']['gpu-thermal'] = value
+            with self.assertRaisesRegex(RuntimeError, 'Thermal admission'):
+                check_admission(pre, config)
+        pre['thermal_millicelsius']['gpu-thermal'] = 50000
+        pre['containers']['stdout'] += 'foreign runtime\n'
+        with self.assertRaisesRegex(RuntimeError, 'another container'):
+            check_admission(pre, config)
+
     def test_temporarily_unavailable_sensor_preserves_other_temperatures(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
