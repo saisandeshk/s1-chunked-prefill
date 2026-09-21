@@ -2,7 +2,7 @@
 
 A standalone HiPC SRS study of how **fixed prefill chunk size** affects ongoing decoding when long prompts arrive on a Jetson AGX Orin.
 
-**Current state:** the two-device diagnostic pilot is complete; frozen 12-block measurement campaigns are running on both Orins. The paper's methods/validation draft compiles to two pages. See [the development plan](PLAN.md) for live process handles, evidence, and remaining work; the final paper is not complete. Sai has authorized end-to-end work without waiting for professor review.
+**Current state (September 21 live check):** the two-device diagnostic pilot and frozen 12-block data collection are complete on both Orins. Each repeated campaign records 36 cells, 216 measured traces and 216 warmups, with zero diagnostic exclusions; sealing, full post-run audit and final analysis remain pending. The paper's methods/validation draft compiles to two pages. See [the development plan](PLAN.md) for terminal process records, evidence, and remaining work; the final paper is not complete. Sai has authorized end-to-end work without waiting for professor review.
 
 ## Start here
 
